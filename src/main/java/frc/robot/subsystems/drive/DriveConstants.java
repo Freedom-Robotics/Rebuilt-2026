@@ -32,7 +32,7 @@ public class DriveConstants {
   public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0);
   public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0);
   public static final Rotation2d backLeftZeroRotation = new Rotation2d(Math.PI);
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(Math.PI/2);
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(Math.PI / 2);
 
   // Device CAN IDs
   public static final int pigeonCanId = 15;
