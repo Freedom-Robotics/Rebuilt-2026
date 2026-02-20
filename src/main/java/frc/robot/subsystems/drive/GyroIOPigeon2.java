@@ -32,7 +32,7 @@ public class GyroIOPigeon2 implements GyroIO {
     pigeon.getConfigurator().apply(new Pigeon2Configuration());
     pigeon.getConfigurator().setYaw(0.0);
     yaw.setUpdateFrequency(odometryFrequency);
-    yawVelocity.setUpdateFrequency(50.0);
+    yawVelocity.setUpdateFrequency(100.0);
     pigeon.optimizeBusUtilization();
     yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
     var yawClone = yaw.clone(); // Status signals are not thread-safe
