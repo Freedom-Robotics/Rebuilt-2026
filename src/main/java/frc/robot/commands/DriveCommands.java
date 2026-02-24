@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import java.text.DecimalFormat;
@@ -43,6 +44,24 @@ public class DriveCommands {
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
 
   private DriveCommands() {}
+
+  // public static Command
+
+  public static Rotation2d hubAngle(Pose2d pose) {
+    Rotation2d omega = new Rotation2d();
+    if (DriverStation.getAlliance().get() == Alliance.Red) {
+      omega =
+          new Rotation2d(
+              Math.atan2(
+                  Constants.redHub.getY() - pose.getY(), Constants.redHub.getX() - pose.getX()));
+    } else if (DriverStation.getAlliance().get() == Alliance.Blue) {
+      omega =
+          new Rotation2d(
+              Math.atan2(
+                  Constants.blueHub.getY() - pose.getY(), Constants.blueHub.getX() - pose.getX()));
+    }
+    return omega;
+  }
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
     // Apply deadband
