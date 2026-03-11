@@ -27,7 +27,6 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -62,9 +61,11 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name, robotToCamera0));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name,
+        // robotToCamera0));
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         break;
 
       case SIM:
@@ -125,32 +126,32 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    // Default command, normal field-relative drive
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDrive(
-    //         drive,
-    //         () -> controller.getLeftY(),
-    //         () -> controller.getLeftX(),
-    //         () -> -controller.getRightX()));
-
+    // // Default command, normal field-relative drive
     drive.setDefaultCommand(
-        DriveCommands.joystickDriveAtAngle(
+        DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> {
-              Rotation2d rot = new Rotation2d();
-              if (Math.hypot(controller.getRightY(), controller.getRightX()) > 0.9) {
-                rot =
-                    new Rotation2d(
-                        -(Math.atan2(controller.getRightY(), controller.getRightX())
-                            - Math.PI / 2));
-              } else {
-                rot = drive.getRotation();
-              }
-              Logger.recordOutput("Commanded Rotation", rot);
-              return rot;
-            }));
+            () -> controller.getLeftY(),
+            () -> controller.getLeftX(),
+            () -> -controller.getRightX()));
+
+    // drive.setDefaultCommand(
+    //     DriveCommands.joystickDriveAtAngle(
+    //         drive,
+    //         () -> -controller.getLeftY(),
+    //         () -> -controller.getLeftX(),
+    //         () -> {
+    //           Rotation2d rot = new Rotation2d();
+    //           if (Math.hypot(controller.getRightY(), controller.getRightX()) > 0.9) {
+    //             rot =
+    //                 new Rotation2d(
+    //                     -(Math.atan2(controller.getRightY(), controller.getRightX())
+    //                         - Math.PI / 2));
+    //           } else {
+    //             rot = drive.getRotation();
+    //           }
+    //           Logger.recordOutput("Commanded Rotation", rot);
+    //           return rot;
+    //         }));
 
     // Lock to 0° when A button is held
     controller
