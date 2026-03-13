@@ -25,7 +25,6 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
-import frc.robot.subsystems.superstructure.ExampleSubsystem;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -45,7 +44,6 @@ public class RobotContainer {
 
   private final Vision vision;
 
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -54,7 +52,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    m_exampleSubsystem.setDefaultCommand(m_exampleSubsystem.set(0));
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -119,7 +116,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-      }
+  }
 
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
