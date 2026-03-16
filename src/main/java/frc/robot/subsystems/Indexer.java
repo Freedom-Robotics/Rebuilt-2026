@@ -2,24 +2,18 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.function.Supplier;
-import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
@@ -31,113 +25,127 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
-/** AdvantageKit Feeder Subsystem, capable of replaying the feeder. */
 public class Indexer extends SubsystemBase {
 
-  /**
-   * AdvantageKit identifies inputs via the "Replay Bubble". Everything going to the SMC is an
-   * Output. Everything coming from the SMC is an Input.
-   */
-  @AutoLog
-  public static class IndexerInputs {
-
-    public AngularVelocity velocity = DegreesPerSecond.of(0);
-    public AngularVelocity setpoint = DegreesPerSecond.of(0);
-    public Voltage volts = Volts.of(0);
-    public Current current = Amps.of(0);
-  }
-
-  private final IndexerInputsAutoLogged indexerInputs = new IndexerInputsAutoLogged();
-
-  private final SparkMax armMotor = new SparkMax(20, MotorType.kBrushless);
-
-  private final SmartMotorControllerConfig motorConfig =
+  private SmartMotorControllerConfig smcConfig =
       new SmartMotorControllerConfig(this)
-          .withClosedLoopController(1, 0, 0, RPM.of(10000), RPM.per(Second).of(60))
-          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-          .withIdleMode(MotorMode.COAST)
-          .withTelemetry("IndexerMotor", TelemetryVerbosity.HIGH)
-          .withStatorCurrentLimit(Amps.of(40))
-          .withMotorInverted(false)
+          .withControlMode(ControlMode.CLOSED_LOOP)
+          // Feedback Constants (PID Constants)
+          .withClosedLoopController(
+              50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+          .withSimClosedLoopController(
+              50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+          // Feedforward Constants
           .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-          .withControlMode(ControlMode.CLOSED_LOOP);
-  private final SmartMotorController motor =
-      new SparkWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
-  private final FlyWheelConfig indexerConfig =
-      new FlyWheelConfig(motor)
+          .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+          // Telemetry name and verbosity level
+          .withTelemetry("IndexerMotor", TelemetryVerbosity.HIGH)
+          // Gearing from the motor rotor to final shaft.
+          // In this example GearBox.fromReductionStages(3,4) is the same as
+          // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to your
+          // motor.
+          // You could also use .withGearing(12) which does the same thing.
+          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+          // Motor properties to prevent over currenting.
+          .withMotorInverted(false)
+          .withIdleMode(MotorMode.COAST)
+          .withStatorCurrentLimit(Amps.of(40));
+
+  // Vendor motor controller object
+  private SparkMax spark = new SparkMax(13, MotorType.kBrushless);
+
+  // Create our SmartMotorController from our Spark and config with the NEO.
+  private SmartMotorController sparkSmartMotorController =
+      new SparkWrapper(spark, DCMotor.getNEO(1), smcConfig);
+
+  private final FlyWheelConfig shooterConfig =
+      new FlyWheelConfig(sparkSmartMotorController)
           // Diameter of the flywheel.
           .withDiameter(Inches.of(4))
           // Mass of the flywheel.
           .withMass(Pounds.of(1))
+          // Maximum speed of the shooter.
+          .withUpperSoftLimit(RPM.of(1000))
+          // Telemetry name and verbosity for the arm.
           .withTelemetry("IndexerMech", TelemetryVerbosity.HIGH);
-  private final FlyWheel indexer = new FlyWheel(indexerConfig);
 
-  /** Update the AdvantageKit "inputs" (data coming from the SMC) */
-  private void updateInputs() {
-    indexerInputs.velocity = indexer.getSpeed();
-    indexerInputs.setpoint = motor.getMechanismSetpointVelocity().orElse(RPM.of(0));
-    indexerInputs.volts = motor.getVoltage();
-    indexerInputs.current = motor.getStatorCurrent();
-  }
-
-  public Indexer() {}
+  // Shooter Mechanism
+  private FlyWheel shooter = new FlyWheel(shooterConfig);
 
   /**
-   * Gets the current velocity of the feeder.
+   * Gets the current velocity of the shooter.
    *
-   * @return FlyWheel velocity.
+   * @return Shooter velocity.
    */
   public AngularVelocity getVelocity() {
-    return indexerInputs.velocity;
+    return shooter.getSpeed();
   }
 
   /**
-   * Set the feeder velocity.
+   * Set the shooter velocity setpoint.
+   *
+   * @param speed Speed to set
+   */
+  public void setVelocitySetpoint(AngularVelocity speed) {
+    shooter.setMechanismVelocitySetpoint(speed);
+  }
+
+  /**
+   * Set the shooter velocity.
    *
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
-    Logger.recordOutput("Indexer/Setpoint", speed);
-    return indexer.setSpeed(speed);
+    return shooter.run(speed);
   }
 
   /**
-   * Set the dutycycle of the feeder.
+   * Set the dutycycle of the shooter.
    *
    * @param dutyCycle DutyCycle to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command set(double dutyCycle) {
-    Logger.recordOutput("Indexer/DutyCycle", dutyCycle);
-    return indexer.set(dutyCycle);
+    return shooter.set(dutyCycle);
   }
 
-  public Command setVelocity(Supplier<AngularVelocity> speed) {
-    return indexer.setSpeed(
+  /** Creates a new ExampleSubsystem. */
+  public Indexer() {}
+
+  /**
+   * Example command factory method.
+   *
+   * @return a command
+   */
+  public Command exampleMethodCommand() {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return runOnce(
         () -> {
-          Logger.recordOutput("Indexer/Setpoint", speed.get());
-          return speed.get();
+          /* one-time action goes here */
         });
   }
 
-  public Command setDutyCycle(Supplier<Double> dutyCycle) {
-    return indexer.set(
-        () -> {
-          Logger.recordOutput("Indexer/DutyCycle", dutyCycle.get());
-          return dutyCycle.get();
-        });
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    indexer.simIterate();
+  /**
+   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
+   *
+   * @return value of some boolean subsystem state, such as a digital sensor.
+   */
+  public boolean exampleCondition() {
+    // Query some boolean state, such as a digital sensor.
+    return false;
   }
 
   @Override
   public void periodic() {
-    updateInputs();
-    Logger.processInputs("Indexer", indexerInputs);
-    indexer.updateTelemetry();
+    // This method will be called once per scheduler run
+    shooter.updateTelemetry();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    // This method will be called once per scheduler run during simulation
+    shooter.simIterate();
   }
 }

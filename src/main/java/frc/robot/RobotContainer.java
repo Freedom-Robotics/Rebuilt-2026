@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Launcher;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -28,7 +30,6 @@ import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -49,6 +50,10 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private final Launcher shooter;
+
+  private final Indexer indexer;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -66,6 +71,8 @@ public class RobotContainer {
         //         drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name,
         // robotToCamera0));
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        shooter = new Launcher();
+        indexer = new Indexer();
         break;
 
       case SIM:
@@ -81,6 +88,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose));
+        shooter = new Launcher();
+        indexer = new Indexer();
         break;
 
       default:
@@ -93,6 +102,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        shooter = new Launcher();
+        indexer = new Indexer();
         break;
     }
 
@@ -133,6 +144,9 @@ public class RobotContainer {
             () -> controller.getLeftY(),
             () -> controller.getLeftX(),
             () -> -controller.getRightX()));
+
+    shooter.setDefaultCommand(shooter.set(0));
+    indexer.setDefaultCommand(indexer.set(0));
 
     // drive.setDefaultCommand(
     //     DriveCommands.joystickDriveAtAngle(
@@ -177,18 +191,22 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .leftBumper()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> {
-                  Rotation2d rot = DriveCommands.hubAngle(drive.getPose());
-                  Logger.recordOutput("Commanded Rotation", rot);
-                  return rot;
-                }));
+    // controller
+    //     .leftBumper()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> {
+    //               Rotation2d rot = DriveCommands.hubAngle(drive.getPose());
+    //               Logger.recordOutput("Commanded Rotation", rot);
+    //               return rot;
+    //             }));
+    controller.leftBumper().whileTrue(shooter.set(0.8));
+    controller.leftTrigger().whileTrue(shooter.set(-0.8));
+    controller.rightTrigger().whileTrue(indexer.set(-0.7));
+    controller.rightBumper().whileTrue(indexer.set(0.7));
   }
 
   /**

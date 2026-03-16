@@ -8,8 +8,12 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -49,20 +53,25 @@ public class Launcher extends SubsystemBase {
 
   private final LauncherInputsAutoLogged launcherInputs = new LauncherInputsAutoLogged();
 
-  private final SparkMax armMotor = new SparkMax(20, MotorType.kBrushless);
+  private final SparkMax armMotor = new SparkMax(12, MotorType.kBrushless);
+
+  private final SparkMax secMotor = new SparkMax(11, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig =
       new SmartMotorControllerConfig(this)
           .withClosedLoopController(1, 0, 0, RPM.of(10000), RPM.per(Second).of(60))
-          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+          .withGearing(new MechanismGearing(GearBox.fromReductionStages(60 / 40)))
           .withIdleMode(MotorMode.COAST)
           .withTelemetry("LauncherMotor", TelemetryVerbosity.HIGH)
           .withStatorCurrentLimit(Amps.of(40))
           .withMotorInverted(false)
-          .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+          .withFeedforward(new SimpleMotorFeedforward(0.2, 0.12, 0.01))
           .withControlMode(ControlMode.CLOSED_LOOP);
+
+  private SparkMaxConfig secConfig = new SparkMaxConfig();
+
   private final SmartMotorController motor =
-      new SparkWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
+      new SparkWrapper(armMotor, DCMotor.getNEO(2), motorConfig);
   private final FlyWheelConfig launcherConfig =
       new FlyWheelConfig(motor)
           // Diameter of the flywheel.
@@ -80,7 +89,11 @@ public class Launcher extends SubsystemBase {
     launcherInputs.current = motor.getStatorCurrent();
   }
 
-  public Launcher() {}
+  public Launcher() {
+    secConfig.smartCurrentLimit(40).idleMode(IdleMode.kCoast).follow(12, true);
+
+    secMotor.configure(secConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  }
 
   /**
    * Gets the current velocity of the launcher.
