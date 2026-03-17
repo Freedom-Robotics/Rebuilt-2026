@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -20,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.Indexer;
-import frc.robot.subsystems.Launcher;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -29,7 +30,6 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -50,7 +50,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final Launcher shooter;
+  private final Shooter shooter;
 
   private final Indexer indexer;
 
@@ -71,7 +71,7 @@ public class RobotContainer {
         //         drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name,
         // robotToCamera0));
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-        shooter = new Launcher();
+        shooter = new Shooter();
         indexer = new Indexer();
         break;
 
@@ -84,12 +84,15 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim());
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose));
-        shooter = new Launcher();
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose));
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+
+        shooter = new Shooter();
         indexer = new Indexer();
+
         break;
 
       default:
@@ -102,8 +105,9 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-        shooter = new Launcher();
+        shooter = new Shooter();
         indexer = new Indexer();
+
         break;
     }
 
@@ -203,10 +207,10 @@ public class RobotContainer {
     //               Logger.recordOutput("Commanded Rotation", rot);
     //               return rot;
     //             }));
-    controller.leftBumper().whileTrue(shooter.set(0.8));
+    controller.leftBumper().whileTrue(shooter.setVelocity(RotationsPerSecond.of(40)));
     controller.leftTrigger().whileTrue(shooter.set(-0.8));
     controller.rightTrigger().whileTrue(indexer.set(-0.7));
-    controller.rightBumper().whileTrue(indexer.set(0.7));
+    controller.rightBumper().whileTrue(indexer.setVelocity(RotationsPerSecond.of(23)));
   }
 
   /**

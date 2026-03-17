@@ -5,11 +5,10 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -35,122 +34,132 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
-/** AdvantageKit Launcher Subsystem, capable of replaying the launcher. */
-public class Launcher extends SubsystemBase {
+/** AdvantageKit Shooter Subsystem, capable of replaying the shooter. */
+public class Shooter extends SubsystemBase {
 
   /**
    * AdvantageKit identifies inputs via the "Replay Bubble". Everything going to the SMC is an
    * Output. Everything coming from the SMC is an Input.
    */
   @AutoLog
-  public static class LauncherInputs {
+  public static class ShooterInputs {
 
     public AngularVelocity velocity = DegreesPerSecond.of(0);
     public AngularVelocity setpoint = DegreesPerSecond.of(0);
     public Voltage volts = Volts.of(0);
     public Current current = Amps.of(0);
+    public AngularVelocity velocity2 = DegreesPerSecond.of(0);
+    public AngularVelocity setpoint2 = DegreesPerSecond.of(0);
+    public Voltage volts2 = Volts.of(0);
+    public Current current2 = Amps.of(0);
   }
 
-  private final LauncherInputsAutoLogged launcherInputs = new LauncherInputsAutoLogged();
+  private final ShooterInputsAutoLogged shooterInputs = new ShooterInputsAutoLogged();
 
-  private final SparkMax armMotor = new SparkMax(12, MotorType.kBrushless);
+  private final SparkMax armMotor = new SparkMax(11, MotorType.kBrushless);
 
-  private final SparkMax secMotor = new SparkMax(11, MotorType.kBrushless);
+  private final SparkMax secMotor = new SparkMax(12, MotorType.kBrushless);
 
   private final SmartMotorControllerConfig motorConfig =
       new SmartMotorControllerConfig(this)
-          .withClosedLoopController(1, 0, 0, RPM.of(10000), RPM.per(Second).of(60))
+          .withClosedLoopController(0, 0, 0)
+          .withSimClosedLoopController(0.04, 0, 0)
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(60 / 40)))
           .withIdleMode(MotorMode.COAST)
-          .withTelemetry("LauncherMotor", TelemetryVerbosity.HIGH)
+          .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
           .withStatorCurrentLimit(Amps.of(40))
           .withMotorInverted(false)
-          .withFeedforward(new SimpleMotorFeedforward(0.2, 0.12, 0.01))
+          .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+          .withSimFeedforward(new SimpleMotorFeedforward(0, 0.1267, 0))
           .withControlMode(ControlMode.CLOSED_LOOP);
 
-  private SparkMaxConfig secConfig = new SparkMaxConfig();
+  private final SparkMaxConfig secConfig = new SparkMaxConfig();
 
   private final SmartMotorController motor =
-      new SparkWrapper(armMotor, DCMotor.getNEO(2), motorConfig);
-  private final FlyWheelConfig launcherConfig =
+      new SparkWrapper(armMotor, DCMotor.getNEO(1), motorConfig);
+  private final FlyWheelConfig shooterConfig =
       new FlyWheelConfig(motor)
           // Diameter of the flywheel.
           .withDiameter(Inches.of(4))
           // Mass of the flywheel.
           .withMass(Pounds.of(1))
-          .withTelemetry("LauncherMech", TelemetryVerbosity.HIGH);
-  private final FlyWheel launcher = new FlyWheel(launcherConfig);
+          .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH);
+  private final FlyWheel shooter = new FlyWheel(shooterConfig);
 
   /** Update the AdvantageKit "inputs" (data coming from the SMC) */
   private void updateInputs() {
-    launcherInputs.velocity = launcher.getSpeed();
-    launcherInputs.setpoint = motor.getMechanismSetpointVelocity().orElse(RPM.of(0));
-    launcherInputs.volts = motor.getVoltage();
-    launcherInputs.current = motor.getStatorCurrent();
+    shooterInputs.velocity = shooter.getSpeed();
+    shooterInputs.setpoint = motor.getMechanismSetpointVelocity().orElse(RPM.of(0));
+    shooterInputs.volts = motor.getVoltage();
+    shooterInputs.current = motor.getStatorCurrent();
+    shooterInputs.velocity2 = RPM.of(secMotor.getEncoder().getVelocity());
+    shooterInputs.setpoint2 = RPM.of(secMotor.getClosedLoopController().getSetpoint());
+    shooterInputs.volts2 = Volts.of(secMotor.getBusVoltage());
+    shooterInputs.current2 = Current.ofBaseUnits(secMotor.getOutputCurrent(), Amps);
   }
 
-  public Launcher() {
-    secConfig.smartCurrentLimit(40).idleMode(IdleMode.kCoast).follow(12, true);
+  public Shooter() {
+    secConfig.smartCurrentLimit(40).idleMode(IdleMode.kCoast).follow(11, true);
 
     secMotor.configure(secConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   /**
-   * Gets the current velocity of the launcher.
+   * Gets the current velocity of the shooter.
    *
    * @return FlyWheel velocity.
    */
   public AngularVelocity getVelocity() {
-    return launcherInputs.velocity;
+    return shooterInputs.velocity;
   }
 
   /**
-   * Set the launcher velocity.
+   * Set the shooter velocity.
    *
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
-    Logger.recordOutput("Launcher/Setpoint", speed);
-    return launcher.setSpeed(speed);
+    Logger.recordOutput("Shooter/Setpoint", speed);
+    return shooter.setSpeed(speed);
   }
 
   /**
-   * Set the dutycycle of the launcher.
+   * Set the dutycycle of the shooter.
    *
    * @param dutyCycle DutyCycle to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command set(double dutyCycle) {
-    Logger.recordOutput("Launcher/DutyCycle", dutyCycle);
-    return launcher.set(dutyCycle);
+    Logger.recordOutput("Shooter/DutyCycle", dutyCycle);
+    return shooter.set(dutyCycle);
   }
 
   public Command setVelocity(Supplier<AngularVelocity> speed) {
-    return launcher.setSpeed(
+    return shooter.setSpeed(
         () -> {
-          Logger.recordOutput("Launcher/Setpoint", speed.get());
+          Logger.recordOutput("Shooter/Setpoint", speed.get());
           return speed.get();
         });
   }
 
   public Command setDutyCycle(Supplier<Double> dutyCycle) {
-    return launcher.set(
+    return shooter.set(
         () -> {
-          Logger.recordOutput("Launcher/DutyCycle", dutyCycle.get());
+          Logger.recordOutput("Shooter/DutyCycle", dutyCycle.get());
           return dutyCycle.get();
         });
   }
 
   @Override
   public void simulationPeriodic() {
-    launcher.simIterate();
+    shooter.simIterate();
   }
 
   @Override
   public void periodic() {
     updateInputs();
-    Logger.processInputs("Launcher", launcherInputs);
-    launcher.updateTelemetry();
+    Logger.processInputs("Shooter", shooterInputs);
+    shooter.updateTelemetry();
   }
 }

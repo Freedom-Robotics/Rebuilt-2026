@@ -2,18 +2,23 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
@@ -25,43 +30,44 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
+/** AdvantageKit Indexer Subsystem, capable of replaying the indexer. */
 public class Indexer extends SubsystemBase {
 
-  private SmartMotorControllerConfig smcConfig =
+  /**
+   * AdvantageKit identifies inputs via the "Replay Bubble". Everything going to the SMC is an
+   * Output. Everything coming from the SMC is an Input.
+   */
+  @AutoLog
+  public static class IndexerInputs {
+
+    public AngularVelocity velocity = DegreesPerSecond.of(0);
+    public Voltage volts = Volts.of(0);
+    public Current current = Amps.of(0);
+  }
+
+  private final IndexerInputsAutoLogged indexerInputs = new IndexerInputsAutoLogged();
+
+  private final SparkMax someMotor = new SparkMax(13, MotorType.kBrushless);
+
+  private final SmartMotorControllerConfig motorConfig =
       new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
-          // Feedback Constants (PID Constants)
-          .withClosedLoopController(
-              50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-          .withSimClosedLoopController(
-              50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-          // Feedforward Constants
+          .withClosedLoopController(0, 0, 0)
+          .withSimClosedLoopController(0, 0, 0)
           .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-          .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-          // Telemetry name and verbosity level
-          .withTelemetry("IndexerMotor", TelemetryVerbosity.HIGH)
-          // Gearing from the motor rotor to final shaft.
-          // In this example GearBox.fromReductionStages(3,4) is the same as
-          // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to your
-          // motor.
-          // You could also use .withGearing(12) which does the same thing.
-          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-          // Motor properties to prevent over currenting.
-          .withMotorInverted(false)
+          .withSimFeedforward(new SimpleMotorFeedforward(0, 0.1, 0))
+          .withGearing(new MechanismGearing(GearBox.fromReductionStages(36 / 12)))
           .withIdleMode(MotorMode.COAST)
-          .withStatorCurrentLimit(Amps.of(40));
+          .withTelemetry("IndexerMotor", TelemetryVerbosity.HIGH)
+          .withStatorCurrentLimit(Amps.of(40))
+          .withMotorInverted(false);
 
-  // Vendor motor controller object
-  private SparkMax spark = new SparkMax(13, MotorType.kBrushless);
+  private final SmartMotorController motor =
+      new SparkWrapper(someMotor, DCMotor.getNEO(1), motorConfig);
 
-  // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController sparkSmartMotorController =
-      new SparkWrapper(spark, DCMotor.getNEO(1), smcConfig);
-
-  private final FlyWheelConfig shooterConfig =
-      new FlyWheelConfig(sparkSmartMotorController)
-          // Diameter of the flywheel.
-          .withDiameter(Inches.of(4))
+  private final FlyWheelConfig flywheelConf =
+      new FlyWheelConfig(motor)
+          .withDiameter(Inches.of(3))
           // Mass of the flywheel.
           .withMass(Pounds.of(1))
           // Maximum speed of the shooter.
@@ -69,16 +75,19 @@ public class Indexer extends SubsystemBase {
           // Telemetry name and verbosity for the arm.
           .withTelemetry("IndexerMech", TelemetryVerbosity.HIGH);
 
-  // Shooter Mechanism
-  private FlyWheel shooter = new FlyWheel(shooterConfig);
+  private FlyWheel indexer = new FlyWheel(flywheelConf);
 
-  /**
-   * Gets the current velocity of the shooter.
-   *
-   * @return Shooter velocity.
-   */
+  /** Update the AdvantageKit "inputs" (data coming from the SMC) */
+  private void updateInputs() {
+    indexerInputs.velocity = motor.getMechanismVelocity();
+    indexerInputs.volts = motor.getVoltage();
+    indexerInputs.current = motor.getStatorCurrent();
+  }
+
+  public Indexer() {}
+
   public AngularVelocity getVelocity() {
-    return shooter.getSpeed();
+    return indexer.getSpeed();
   }
 
   /**
@@ -87,7 +96,7 @@ public class Indexer extends SubsystemBase {
    * @param speed Speed to set
    */
   public void setVelocitySetpoint(AngularVelocity speed) {
-    shooter.setMechanismVelocitySetpoint(speed);
+    indexer.setMechanismVelocitySetpoint(speed);
   }
 
   /**
@@ -97,7 +106,7 @@ public class Indexer extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
-    return shooter.run(speed);
+    return indexer.run(speed);
   }
 
   /**
@@ -107,25 +116,14 @@ public class Indexer extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command set(double dutyCycle) {
-    return shooter.set(dutyCycle);
+    return indexer.set(dutyCycle);
   }
-
-  /** Creates a new ExampleSubsystem. */
-  public Indexer() {}
 
   /**
    * Example command factory method.
    *
    * @return a command
    */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
-  }
 
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
@@ -138,14 +136,44 @@ public class Indexer extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    shooter.updateTelemetry();
+  public void simulationPeriodic() {
+    // This method will be called once per scheduler run during simulation
+    indexer.simIterate();
+  }
+
+  /**
+   * Set the voltage of the indexer.
+   *
+   * @param volts Voltage to set.
+   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   */
+  public Command setVoltage(Voltage volts) {
+    return run(() -> {
+          Logger.recordOutput("Indexer/Voltage", volts);
+          motor.setVoltage(volts);
+        })
+        .withName("IndexerSetVoltage");
+  }
+
+  /**
+   * DutyCycle supplier controlling the indexer
+   *
+   * @param dutyCycle Dutycyle supplier
+   * @return Command
+   */
+  public Command setDutyCycle(Supplier<Double> dutyCycle) {
+    return run(() -> {
+          Logger.recordOutput("Indexer/DutyCycle", dutyCycle.get());
+          motor.setDutyCycle(dutyCycle.get());
+        })
+        .withName("IndexerSetDutyCycleSupplier");
   }
 
   @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-    shooter.simIterate();
+  public void periodic() {
+    updateInputs();
+    Logger.processInputs("Indexer", indexerInputs);
+    motor.updateTelemetry();
+    indexer.updateTelemetry();
   }
 }
