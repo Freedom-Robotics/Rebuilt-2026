@@ -47,6 +47,9 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
+private final CommandXboxController opController = new CommandXboxController(1);
+
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -207,10 +210,21 @@ public class RobotContainer {
     //               Logger.recordOutput("Commanded Rotation", rot);
     //               return rot;
     //             }));
-    controller.leftBumper().whileTrue(shooter.setVelocity(RotationsPerSecond.of(40)));
+
+
+    //shooter to hub
+    controller.leftBumper().whileTrue(shooter.setVelocity(RotationsPerSecond.of(90)));
+
+    //shooter reverse (never really used)
     controller.leftTrigger().whileTrue(shooter.set(-0.8));
-    controller.rightTrigger().whileTrue(indexer.set(-0.7));
-    controller.rightBumper().whileTrue(indexer.setVelocity(RotationsPerSecond.of(23)));
+    // controller.rightTrigger().whileTrue(indexer.setVelocity(RotationsPerSecond.of(-30)));
+    // controller.rightBumper().whileTrue(indexer.setVelocity(RotationsPerSecond.of(30)));
+
+    //hopper indexer to shooter
+    controller.rightTrigger().whileTrue(indexer.set(-0.8));
+
+    //indexer to hopper
+    controller.leftTrigger().whileTrue(indexer.set(0.8));
   }
 
   /**
