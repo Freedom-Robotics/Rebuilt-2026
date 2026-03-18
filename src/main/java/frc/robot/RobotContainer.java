@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -47,8 +48,7 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
-private final CommandXboxController opController = new CommandXboxController(1);
-
+  private final CommandXboxController opController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -211,20 +211,26 @@ private final CommandXboxController opController = new CommandXboxController(1);
     //               return rot;
     //             }));
 
+    // shooter to hub
+    opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(90)));
 
-    //shooter to hub
-    controller.leftBumper().whileTrue(shooter.setVelocity(RotationsPerSecond.of(90)));
-
-    //shooter reverse (never really used)
-    controller.leftTrigger().whileTrue(shooter.set(-0.8));
+    // shooter reverse (never really used)
+    opController.leftTrigger().whileTrue(shooter.set(-0.8));
     // controller.rightTrigger().whileTrue(indexer.setVelocity(RotationsPerSecond.of(-30)));
     // controller.rightBumper().whileTrue(indexer.setVelocity(RotationsPerSecond.of(30)));
 
-    //hopper indexer to shooter
-    controller.rightTrigger().whileTrue(indexer.set(-0.8));
+    // hopper indexer to shooter
+    controller.rightBumper().whileTrue(indexer.set(-0.8));
 
-    //indexer to hopper
-    controller.leftTrigger().whileTrue(indexer.set(0.8));
+    // hopper indexer to shooter
+    opController.rightBumper().whileTrue(indexer.set(-0.8));
+
+    // indexer to hopper
+    opController
+        .leftBumper()
+        .whileTrue(
+            new ParallelCommandGroup(
+                indexer.set(0.8), shooter.setVelocity(RotationsPerSecond.of(90))));
   }
 
   /**
