@@ -216,8 +216,6 @@ public class RobotContainer {
 
     // shooter reverse (never really used)
     opController.leftTrigger().whileTrue(shooter.set(-0.8));
-    // controller.rightTrigger().whileTrue(indexer.setVelocity(RotationsPerSecond.of(-30)));
-    // controller.rightBumper().whileTrue(indexer.setVelocity(RotationsPerSecond.of(30)));
 
     // hopper indexer to shooter
     controller.rightBumper().whileTrue(indexer.set(-0.8));
@@ -225,7 +223,7 @@ public class RobotContainer {
     // hopper indexer to shooter
     opController.rightBumper().whileTrue(indexer.set(-0.8));
 
-    // indexer to hopper
+    // intake to hopper
     opController
         .leftBumper()
         .whileTrue(
