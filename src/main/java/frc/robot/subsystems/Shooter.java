@@ -69,8 +69,8 @@ public class Shooter extends SubsystemBase {
           .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
           .withStatorCurrentLimit(Amps.of(40))
           .withMotorInverted(false)
-          .withFeedforward(new SimpleMotorFeedforward(0, 0.285, 0))
-          .withSimFeedforward(new SimpleMotorFeedforward(0, 0.1267, 0))
+          .withFeedforward(new SimpleMotorFeedforward(0, 0.25, 0))
+          .withSimFeedforward(new SimpleMotorFeedforward(0, 0.285, 0))
           .withControlMode(ControlMode.CLOSED_LOOP);
 
   private final SparkMaxConfig secConfig = new SparkMaxConfig();

@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -18,6 +19,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -114,10 +117,23 @@ public class RobotContainer {
         break;
     }
 
+    NamedCommands.registerCommand("Shooter Out", shooter.setVelocity(RotationsPerSecond.of(90)));
+    NamedCommands.registerCommand("Intake In", shooter.setVelocity(RotationsPerSecond.of(90)));
+    NamedCommands.registerCommand("Intake to Hopper", indexer.set(-0.8));
+    NamedCommands.registerCommand("Hopper to Shooter", indexer.set(0.8));
+    NamedCommands.registerCommand("Indexer Off", indexer.set(0));
+    NamedCommands.registerCommand("Shooter/Intake Off", shooter.set(0));
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
+    autoChooser.addOption(
+        "Shoot auto",
+        new SequentialCommandGroup(
+            shooter.setVelocity(RotationsPerSecond.of(90)),
+            new WaitCommand(1.5),
+            indexer.setDutyCycle(() -> 0.8)));
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -212,7 +228,7 @@ public class RobotContainer {
     //             }));
 
     // shooter to hub
-    opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(90)));
+    opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(80)));
 
     // shooter reverse (never really used)
     opController.leftTrigger().whileTrue(shooter.set(-0.8));
