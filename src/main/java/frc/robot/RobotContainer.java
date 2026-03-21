@@ -19,8 +19,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -117,10 +115,10 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("Shooter Out", shooter.setVelocity(RotationsPerSecond.of(90)));
-    NamedCommands.registerCommand("Intake In", shooter.setVelocity(RotationsPerSecond.of(90)));
-    NamedCommands.registerCommand("Intake to Hopper", indexer.set(-0.8));
-    NamedCommands.registerCommand("Hopper to Shooter", indexer.set(0.8));
+    NamedCommands.registerCommand("Shooter Out", shooter.setVelocity(RotationsPerSecond.of(85)));
+    NamedCommands.registerCommand("Intake In", shooter.set(0.7));
+    NamedCommands.registerCommand("Intake to Hopper", indexer.set(0.4));
+    NamedCommands.registerCommand("Hopper to Shooter", indexer.set(-0.6));
     NamedCommands.registerCommand("Indexer Off", indexer.set(0));
     NamedCommands.registerCommand("Shooter/Intake Off", shooter.set(0));
 
@@ -128,12 +126,12 @@ public class RobotContainer {
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
-    autoChooser.addOption(
-        "Shoot auto",
-        new SequentialCommandGroup(
-            shooter.setVelocity(RotationsPerSecond.of(90)),
-            new WaitCommand(1.5),
-            indexer.setDutyCycle(() -> 0.8)));
+    // autoChooser.addOption(
+    //     "Shoot auto",
+    //     new SequentialCommandGroup(
+    //         shooter.setVelocity(RotationsPerSecond.of(90)),
+    //         new WaitCommand(1.5),
+    //         indexer.setDutyCycle(() -> 0.8)));
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -166,7 +164,7 @@ public class RobotContainer {
             drive,
             () -> controller.getLeftY(),
             () -> controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -controller.getRightX() * 0.8));
 
     shooter.setDefaultCommand(shooter.set(0));
     indexer.setDefaultCommand(indexer.set(0));
@@ -228,23 +226,21 @@ public class RobotContainer {
     //             }));
 
     // shooter to hub
-    opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(80)));
+    opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(85)));
 
     // shooter reverse (never really used)
-    opController.leftTrigger().whileTrue(shooter.set(-0.8));
+    opController.leftTrigger().whileTrue(shooter.set(-0.9));
 
     // hopper indexer to shooter
-    controller.rightBumper().whileTrue(indexer.set(-0.8));
+    // controller.rightBumper().whileTrue(indexer.set(-0.35));
 
     // hopper indexer to shooter
-    opController.rightBumper().whileTrue(indexer.set(-0.8));
+    opController.rightBumper().whileTrue(indexer.set(-0.6));
 
     // intake to hopper
     opController
         .leftBumper()
-        .whileTrue(
-            new ParallelCommandGroup(
-                indexer.set(0.8), shooter.setVelocity(RotationsPerSecond.of(90))));
+        .whileTrue(new ParallelCommandGroup(indexer.set(0.35), shooter.set(0.69)));
   }
 
   /**

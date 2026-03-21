@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.55,
-        "y": 4.010661896243291
+        "x": 0.48180679785330904,
+        "y": 7.547799642218246
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7854926349361206,
-        "y": 4.010661896243291
+        "x": 1.481806797853309,
+        "y": 7.547799642218246
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "After Depot"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 4.010661896243291
       },
       "prevControl": {
-        "x": 2.3772264745519918,
-        "y": 4.010661896243291
+        "x": 3.0616457960644006,
+        "y": 4.57855098389982
       },
       "nextControl": null,
       "isLocked": false,
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }
