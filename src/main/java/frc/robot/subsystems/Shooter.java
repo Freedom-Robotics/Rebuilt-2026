@@ -62,14 +62,14 @@ public class Shooter extends SubsystemBase {
 
   private final SmartMotorControllerConfig motorConfig =
       new SmartMotorControllerConfig(this)
-          .withClosedLoopController(0.01, 0, 0)
+          .withClosedLoopController(0.001, 0, 0)
           .withSimClosedLoopController(0, 0, 0)
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(60.0 / 40)))
           .withIdleMode(MotorMode.COAST)
           .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
           .withStatorCurrentLimit(Amps.of(40))
           .withMotorInverted(false)
-          .withFeedforward(new SimpleMotorFeedforward(0, 0.155, 0))
+          .withFeedforward(new SimpleMotorFeedforward(0, 0.193, 0))
           .withSimFeedforward(new SimpleMotorFeedforward(0, 0.285, 0))
           .withControlMode(ControlMode.CLOSED_LOOP);
 

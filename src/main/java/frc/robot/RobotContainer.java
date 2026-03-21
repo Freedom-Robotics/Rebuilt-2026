@@ -115,7 +115,7 @@ public class RobotContainer {
         break;
     }
 
-    NamedCommands.registerCommand("Shooter Out", shooter.setVelocity(RotationsPerSecond.of(85)));
+    NamedCommands.registerCommand("Shooter Out", shooter.setVelocity(RotationsPerSecond.of(47.5)));
     NamedCommands.registerCommand("Intake In", shooter.set(0.7));
     NamedCommands.registerCommand("Intake to Hopper", indexer.set(0.4));
     NamedCommands.registerCommand("Hopper to Shooter", indexer.set(-0.6));
@@ -226,7 +226,7 @@ public class RobotContainer {
     //             }));
 
     // shooter to hub
-    opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(85)));
+    opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(47.5)));
 
     // shooter reverse (never really used)
     opController.leftTrigger().whileTrue(shooter.set(-0.9));
@@ -240,7 +240,7 @@ public class RobotContainer {
     // intake to hopper
     opController
         .leftBumper()
-        .whileTrue(new ParallelCommandGroup(indexer.set(0.35), shooter.set(0.69)));
+        .whileTrue(new ParallelCommandGroup(indexer.set(0.8), shooter.set(0.69)));
   }
 
   /**
