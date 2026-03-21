@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -119,8 +121,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake In", shooter.set(0.7));
     NamedCommands.registerCommand("Intake to Hopper", indexer.set(0.4));
     NamedCommands.registerCommand("Hopper to Shooter", indexer.set(-0.6));
-    NamedCommands.registerCommand("Indexer Off", indexer.set(0));
-    NamedCommands.registerCommand("Shooter/Intake Off", shooter.set(0));
+    NamedCommands.registerCommand(
+        "Indexer Off", new ParallelDeadlineGroup(new WaitCommand(0.2), indexer.set(0)));
+    NamedCommands.registerCommand(
+        "Shooter/Intake Off", new ParallelDeadlineGroup(new WaitCommand(0.2), shooter.set(0)));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
