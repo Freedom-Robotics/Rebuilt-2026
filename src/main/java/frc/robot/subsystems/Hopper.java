@@ -6,8 +6,10 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -17,8 +19,13 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ArmConfig;
@@ -31,6 +38,16 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
 public class Hopper extends SubsystemBase {
+
+  @AutoLog
+  public static class HopperInputs {
+    public AngularVelocity velocity = DegreesPerSecond.of(0);
+    public AngularVelocity setpoint = DegreesPerSecond.of(0);
+    public Voltage volts = Volts.of(0);
+    public Current current = Amps.of(0);
+  }
+
+  private final HopperInputsAutoLogged hopperInputs = new HopperInputsAutoLogged();
 
   private SmartMotorControllerConfig smcConfig =
       new SmartMotorControllerConfig(this)
@@ -50,7 +67,7 @@ public class Hopper extends SubsystemBase {
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(16, 40.0 / 9)))
           // Motor properties to prevent over currenting.
           .withMotorInverted(false)
-          .withIdleMode(MotorMode.COAST)
+          .withIdleMode(MotorMode.BRAKE)
           .withStatorCurrentLimit(Amps.of(40))
           .withClosedLoopRampRate(Seconds.of(0.25))
           .withOpenLoopRampRate(Seconds.of(0.25));
@@ -65,7 +82,7 @@ public class Hopper extends SubsystemBase {
   private ArmConfig armCfg =
       new ArmConfig(sparkSmartMotorController)
           // Soft limit is applied to the SmartMotorControllers PID
-          .withSoftLimits(Degrees.of(0), Degrees.of(90))
+
           // Hard limit is applied to the simulation.
           .withHardLimit(Degrees.of(-30), Degrees.of(90))
           // Starting position is where your arm starts
@@ -78,6 +95,14 @@ public class Hopper extends SubsystemBase {
 
   // Arm Mechanism
   private Arm arm = new Arm(armCfg);
+
+  private void updateInputs() {
+    hopperInputs.velocity = sparkSmartMotorController.getRotorVelocity();
+    hopperInputs.setpoint =
+        sparkSmartMotorController.getMechanismSetpointVelocity().orElse(RPM.of(0));
+    hopperInputs.volts = sparkSmartMotorController.getVoltage();
+    hopperInputs.current = sparkSmartMotorController.getStatorCurrent();
+  }
 
   /**
    * Set the angle of the arm, does not stop when the arm reaches the setpoint.
@@ -154,6 +179,8 @@ public class Hopper extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    updateInputs();
+    Logger.processInputs("Hopper", hopperInputs);
     arm.updateTelemetry();
   }
 

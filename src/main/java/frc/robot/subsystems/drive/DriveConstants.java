@@ -67,7 +67,7 @@ public class DriveConstants {
   public static final double driveKp = 0.0;
   public static final double driveKd = 0.0;
   public static final double driveKs = 0.0;
-  public static final double driveKv = 0.1;
+  public static final double driveKv = 0.093;
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -85,7 +85,7 @@ public class DriveConstants {
   public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0; // RPM -> Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 1.0;
+  public static final double turnKp = 0.8;
   public static final double turnKd = 0.0;
   public static final double turnSimP = 5000.0;
   public static final double turnSimD = 0.0;
@@ -93,7 +93,7 @@ public class DriveConstants {
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 74.088;
+  public static final double robotMassKg = 40;
   public static final double robotMOI = 6.883;
   public static final double wheelCOF = 1.2;
   public static final RobotConfig ppConfig =

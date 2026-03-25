@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.drive.Drive;
@@ -34,6 +35,7 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -60,6 +62,8 @@ public class RobotContainer {
 
   private final Indexer indexer;
 
+  private final Hopper hopper;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -72,13 +76,13 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name,
-        // robotToCamera0));
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name, robotToCamera0));
+        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         shooter = new Shooter();
         indexer = new Indexer();
+        hopper = new Hopper();
         break;
 
       case SIM:
@@ -98,7 +102,7 @@ public class RobotContainer {
 
         shooter = new Shooter();
         indexer = new Indexer();
-
+        hopper = new Hopper();
         break;
 
       default:
@@ -113,13 +117,13 @@ public class RobotContainer {
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         shooter = new Shooter();
         indexer = new Indexer();
-
+        hopper = new Hopper();
         break;
     }
 
     NamedCommands.registerCommand("Shooter Out", shooter.setVelocity(RotationsPerSecond.of(47.5)));
-    NamedCommands.registerCommand("Intake In", shooter.set(0.7));
-    NamedCommands.registerCommand("Intake to Hopper", indexer.set(0.4));
+    NamedCommands.registerCommand("Intake In", shooter.set(0.69));
+    NamedCommands.registerCommand("Intake to Hopper", indexer.set(0.8));
     NamedCommands.registerCommand("Hopper to Shooter", indexer.set(-0.6));
     NamedCommands.registerCommand(
         "Indexer Off", new ParallelDeadlineGroup(new WaitCommand(0.2), indexer.set(0)));
@@ -172,6 +176,7 @@ public class RobotContainer {
 
     shooter.setDefaultCommand(shooter.set(0));
     indexer.setDefaultCommand(indexer.set(0));
+    hopper.setDefaultCommand(hopper.set(0));
 
     // drive.setDefaultCommand(
     //     DriveCommands.joystickDriveAtAngle(
@@ -245,6 +250,9 @@ public class RobotContainer {
     opController
         .leftBumper()
         .whileTrue(new ParallelCommandGroup(indexer.set(0.8), shooter.set(0.69)));
+
+    opController.a().whileTrue(hopper.set(1));
+    opController.y().whileTrue(hopper.set(-1));
   }
 
   /**
