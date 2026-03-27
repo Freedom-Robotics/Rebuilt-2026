@@ -35,7 +35,6 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -76,10 +75,11 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name, robotToCamera0));
-        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name,
+        // robotToCamera0));
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         shooter = new Shooter();
         indexer = new Indexer();
         hopper = new Hopper();
@@ -170,8 +170,8 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> controller.getLeftY(),
-            () -> controller.getLeftX(),
+            () -> (controller.getLeftY()),
+            () -> (controller.getLeftX()),
             () -> -controller.getRightX() * 0.8));
 
     shooter.setDefaultCommand(shooter.set(0));
@@ -244,15 +244,17 @@ public class RobotContainer {
     // controller.rightBumper().whileTrue(indexer.set(-0.35));
 
     // hopper indexer to shooter
-    opController.rightBumper().whileTrue(indexer.set(-0.6));
+    opController
+        .rightBumper()
+        .whileTrue(new ParallelCommandGroup(indexer.set(-0.6), hopper.set(0.075)));
 
     // intake to hopper
     opController
         .leftBumper()
         .whileTrue(new ParallelCommandGroup(indexer.set(0.8), shooter.set(0.69)));
 
-    opController.a().whileTrue(hopper.set(1));
-    opController.y().whileTrue(hopper.set(-1));
+    opController.a().whileTrue(hopper.set(0.1));
+    opController.y().whileTrue(hopper.set(-0.1));
   }
 
   /**
