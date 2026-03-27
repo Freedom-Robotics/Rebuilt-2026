@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -129,7 +130,35 @@ public class RobotContainer {
         "Indexer Off", new ParallelDeadlineGroup(new WaitCommand(0.2), indexer.set(0)));
     NamedCommands.registerCommand(
         "Shooter/Intake Off", new ParallelDeadlineGroup(new WaitCommand(0.2), shooter.set(0)));
-
+    NamedCommands.registerCommand("Shoot", new ParallelCommandGroup(
+        //shoot sequential
+        new SequentialCommandGroup(
+            new ParallelDeadlineGroup(new WaitCommand(5.750), shooter.setVelocity(RotationsPerSecond.of(47.5))),
+            new ParallelDeadlineGroup(new WaitCommand(0.2), shooter.set(0))
+        ),
+        //hopper to shooter sequential
+        new SequentialCommandGroup(new WaitCommand(0.750),
+            new ParallelDeadlineGroup(new WaitCommand(5), indexer.set(-0.6)),
+            new ParallelDeadlineGroup(new WaitCommand(0.2), indexer.set(0)))
+        )
+    );
+        //intake 
+    NamedCommands.registerCommand("Intake", new ParallelCommandGroup(
+            //intake to indexer sequential
+            new SequentialCommandGroup(
+                new ParallelDeadlineGroup(new WaitCommand(3.750), shooter.set(0.69))), //intake
+                new ParallelDeadlineGroup(new WaitCommand(0.2), shooter.set(0)) //stop intake
+            ),
+            //indexer to hopper sequential    
+            new SequentialCommandGroup(
+                new WaitCommand(0.750), //wait
+                new ParallelDeadlineGroup(new WaitCommand(3.750), indexer.set(0.8) ), //index balls
+                new ParallelDeadlineGroup(new WaitCommand(0.2), indexer.set(0)) //stop indexer
+                
+                
+            )
+        )
+    );
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
