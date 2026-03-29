@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.110322003577817,
-        "y": 5.324919499105545
+        "x": 2.8831663685152056,
+        "y": 5.454722719141323
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.234150268336314,
-        "y": 4.757030411449016
+        "x": 2.023220035778175,
+        "y": 5.2437924865831835
       },
       "isLocked": false,
       "linkedName": "Lshoot"
@@ -45,7 +45,7 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Depot",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 139.18491612511832

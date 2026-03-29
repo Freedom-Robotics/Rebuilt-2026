@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.48180679785330904,
-        "y": 7.547799642218246
+        "x": 7.783237924865832,
+        "y": 4.513649373881932
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.9361180679785326,
-        "y": 7.223291592128801
+        "x": 7.783237924865832,
+        "y": 5.513649373881932
       },
       "isLocked": false,
-      "linkedName": "After Depot"
+      "linkedName": "Ltrench done"
     },
     {
       "anchor": {
-        "x": 2.8831663685152056,
-        "y": 5.454722719141323
+        "x": 7.783237924865832,
+        "y": 7.369320214664732
       },
       "prevControl": {
-        "x": 2.1692486583184256,
-        "y": 6.28221824686941
+        "x": 7.783237924865832,
+        "y": 6.369320214664732
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Lshoot"
+      "linkedName": "Pickup Ltrench"
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.25,
-    "maxAcceleration": 1.5,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 139.18491612511832
+    "rotation": -89.06080905426029
   },
   "reversed": false,
-  "folder": "Depot",
+  "folder": "left trench",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -90.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }
