@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.13,
+        "x": 2.899391771019678,
         "y": 2.861
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.13,
+        "x": 2.899391771019678,
         "y": 1.8610000000000002
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Rshoot"
     },
     {
       "anchor": {
@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 2.5,
-        "y": 0.575
+        "y": 0.5750000000000001
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": "Test",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": -145.0

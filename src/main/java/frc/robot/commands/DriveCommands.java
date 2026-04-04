@@ -52,13 +52,17 @@ public class DriveCommands {
     if (DriverStation.getAlliance().get() == Alliance.Red) {
       omega =
           new Rotation2d(
-              Math.atan2(
-                  Constants.redHub.getY() - pose.getY(), Constants.redHub.getX() - pose.getX()));
+              Math.PI
+                  + Math.atan2(
+                      Constants.redHub.getY() - pose.getY(),
+                      Constants.redHub.getX() - pose.getX()));
     } else if (DriverStation.getAlliance().get() == Alliance.Blue) {
       omega =
           new Rotation2d(
-              Math.atan2(
-                  Constants.blueHub.getY() - pose.getY(), Constants.blueHub.getX() - pose.getX()));
+              Math.PI
+                  + Math.atan2(
+                      Constants.blueHub.getY() - pose.getY(),
+                      Constants.blueHub.getX() - pose.getX()));
     }
     return omega;
   }

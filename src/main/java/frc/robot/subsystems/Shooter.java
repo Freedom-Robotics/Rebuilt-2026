@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.PersistMode;
@@ -14,12 +15,16 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -161,5 +166,39 @@ public class Shooter extends SubsystemBase {
     updateInputs();
     Logger.processInputs("Shooter", shooterInputs);
     shooter.updateTelemetry();
+  }
+
+  public AngularVelocity find_shooter_speed(double kshooter, Pose2d position) {
+    // System.out.println(position.getX() + " " + position.getY());
+    double dist = 0.0;
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+      dist =
+          Math.sqrt(
+              (Constants.redHub.getX() - position.getX())
+                      * (Constants.redHub.getX() - position.getX())
+                  + (Constants.redHub.getY() - position.getY())
+                      * (Constants.redHub.getY() - position.getY()));
+    } else {
+      dist =
+          Math.sqrt(
+              (Constants.blueHub.getX() - position.getX())
+                      * (Constants.blueHub.getX() - position.getX())
+                  + (Constants.blueHub.getY() - position.getY())
+                      * (Constants.blueHub.getY() - position.getY()));
+    }
+    double shooter_angle = 0.558; // radians
+    double const_g = -9.8067 * 39.3701; // inches/second^2
+    double error = dist * -5;
+    double shooter_velocity =
+        dist
+            / (Math.cos(shooter_angle)
+                * Math.sqrt(
+                    Math.abs((2 * (72 - 18.5 - (Math.tan(shooter_angle) * dist))) / const_g)));
+
+    shooter_velocity *= kshooter;
+
+    System.out.println("Shooter Velocity: " + (shooter_velocity + error) / 2);
+
+    return RotationsPerSecond.of((shooter_velocity + error) / 2);
   }
 }

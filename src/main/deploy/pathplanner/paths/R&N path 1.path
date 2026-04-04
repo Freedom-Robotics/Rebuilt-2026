@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.5,
-        "y": 2.35
+        "x": 2.980518783542039,
+        "y": 2.225867620751342
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.13,
+        "x": 2.899391771019678,
         "y": 2.861
       },
       "prevControl": {
-        "x": 3.309834950084663,
-        "y": 2.687335407385251
+        "x": 2.7046869409660106,
+        "y": 2.5503756708407868
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Rshoot"
     }
   ],
   "rotationTargets": [],
@@ -45,7 +45,7 @@
     "rotation": -145.0
   },
   "reversed": false,
-  "folder": "Test",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

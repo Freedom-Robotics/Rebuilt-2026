@@ -36,6 +36,8 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -76,11 +78,10 @@ public class RobotContainer {
                 new ModuleIOSpark(1),
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
-        // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name,
-        // robotToCamera0));
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name, robotToCamera0));
+        // vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
         shooter = new Shooter();
         indexer = new Indexer();
         hopper = new Hopper();
@@ -198,8 +199,8 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> (controller.getLeftY()),
-            () -> (controller.getLeftX()),
+            () -> (-controller.getLeftY()),
+            () -> (-controller.getLeftX()),
             () -> -controller.getRightX() * 0.8));
 
     shooter.setDefaultCommand(shooter.set(0));
@@ -249,18 +250,18 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    // controller
-    //     .leftBumper()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             () -> {
-    //               Rotation2d rot = DriveCommands.hubAngle(drive.getPose());
-    //               Logger.recordOutput("Commanded Rotation", rot);
-    //               return rot;
-    //             }));
+    controller
+        .leftBumper()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> {
+                  Rotation2d rot = DriveCommands.hubAngle(drive.getPose());
+                  Logger.recordOutput("Commanded Rotation", rot);
+                  return rot;
+                }));
 
     // shooter to hub
     opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(50)));
@@ -283,6 +284,14 @@ public class RobotContainer {
 
     opController.a().whileTrue(hopper.set(0.1));
     opController.y().whileTrue(hopper.set(-0.1));
+
+    opController
+        .b()
+        .whileTrue(
+            shooter.setVelocity(
+                () ->
+                    shooter.find_shooter_speed(
+                        5.0 * 50.0 / 12.0 * 1.05 * 50.0 / 47.5, drive.getPose())));
   }
 
   /**
