@@ -7,6 +7,8 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -19,17 +21,27 @@ public class VisionConstants {
 
   // Camera names, must match names configured on coprocessor
   public static String camera0Name = "Brio_101";
-  public static String camera1Name = "camera_1";
+  public static String camera1Name = "NexiGo";
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
   public static Transform3d robotToCamera0 =
-      new Transform3d(0.19276, -0.33655, 0.3544316, new Rotation3d(0.0, 0.61, 0.0));
+      new Transform3d(
+          Meters.convertFrom(6.155, Inches),
+          Meters.convertFrom(-9.545, Inches),
+          // Meters.convertFrom(17.664, Inches),
+          Meters.convertFrom(18.75, Inches),
+          new Rotation3d(-Math.PI / 2, 0.0, Math.PI));
   public static Transform3d robotToCamera1 =
-      new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
+      new Transform3d(
+          Meters.convertFrom(7.095, Inches),
+          Meters.convertFrom(11.184, Inches),
+          Meters.convertFrom(17.292, Inches),
+          // Meters.convertFrom(18.75, Inches),
+          new Rotation3d(0.0, 0.0, Math.PI / 2));
 
   // Basic filtering thresholds
-  public static double maxAmbiguity = 0.3;
+  public static double maxAmbiguity = 0.2;
   public static double maxZError = 0.75;
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
