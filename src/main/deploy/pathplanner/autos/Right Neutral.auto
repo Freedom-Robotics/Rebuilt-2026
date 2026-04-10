@@ -122,6 +122,12 @@
                             "data": {
                               "name": "Intake In"
                             }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Extend"
+                            }
                           }
                         ]
                       }
@@ -130,6 +136,25 @@
                       "type": "named",
                       "data": {
                         "name": "Shooter/Intake Off"
+                      }
+                    },
+                    {
+                      "type": "deadline",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.25
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "StopHopper"
+                            }
+                          }
+                        ]
                       }
                     }
                   ]
@@ -217,6 +242,12 @@
                             "data": {
                               "name": "Shooter Out"
                             }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "Retract"
+                            }
                           }
                         ]
                       }
@@ -225,6 +256,25 @@
                       "type": "named",
                       "data": {
                         "name": "Shooter/Intake Off"
+                      }
+                    },
+                    {
+                      "type": "deadline",
+                      "data": {
+                        "commands": [
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.25
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "StopHopper"
+                            }
+                          }
+                        ]
                       }
                     }
                   ]

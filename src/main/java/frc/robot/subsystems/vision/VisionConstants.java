@@ -28,10 +28,10 @@ public class VisionConstants {
   public static Transform3d robotToCamera0 =
       new Transform3d(
           Meters.convertFrom(6.155, Inches),
-          Meters.convertFrom(-9.545, Inches),
+          Meters.convertFrom(-13, Inches),
           // Meters.convertFrom(17.664, Inches),
-          Meters.convertFrom(18.75, Inches),
-          new Rotation3d(-Math.PI / 2, 0.0, Math.PI));
+          Meters.convertFrom(18.25, Inches),
+          new Rotation3d(-Math.PI / 2, -0.349, Math.PI));
   public static Transform3d robotToCamera1 =
       new Transform3d(
           Meters.convertFrom(7.095, Inches),

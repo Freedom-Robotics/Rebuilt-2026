@@ -139,13 +139,13 @@ public class RobotContainer {
             // shoot sequential
             new SequentialCommandGroup(
                 new ParallelDeadlineGroup(
-                    new WaitCommand(5.750), shooter.setVelocity(RotationsPerSecond.of(47.5))),
+                    new WaitCommand(3.75), shooter.setVelocity(RotationsPerSecond.of(50))),
                 new ParallelDeadlineGroup(new WaitCommand(0.2), shooter.set(0))),
             // hopper to shooter sequential
             new SequentialCommandGroup(
                 new WaitCommand(0.750),
-                new ParallelDeadlineGroup(new WaitCommand(5), indexer.set(-0.6)),
-                new ParallelDeadlineGroup(new WaitCommand(0.2), indexer.set(0)))));
+                new ParallelDeadlineGroup(new WaitCommand(5), indexer.set(-0.6), hopper.set(0.2)),
+                new ParallelDeadlineGroup(new WaitCommand(0.2), indexer.set(0), hopper.set(0)))));
     // intake
     NamedCommands.registerCommand(
         "Intake",
@@ -161,6 +161,12 @@ public class RobotContainer {
                 new ParallelDeadlineGroup(new WaitCommand(3.750), indexer.set(0.8)), // index balls
                 new ParallelDeadlineGroup(new WaitCommand(0.2), indexer.set(0)) // stop indexer
                 )));
+
+    NamedCommands.registerCommand("Extend", hopper.set(-0.2));
+
+    NamedCommands.registerCommand("StopHopper", hopper.set(0));
+
+    NamedCommands.registerCommand("Retract", hopper.set(0.2));
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -279,15 +285,15 @@ public class RobotContainer {
     // hopper indexer to shooter
     opController
         .rightBumper()
-        .whileTrue(new ParallelCommandGroup(indexer.set(-0.6), hopper.set(0.075)));
+        .whileTrue(new ParallelCommandGroup(indexer.set(-0.6), hopper.set(0.2)));
 
     // intake to hopper
     opController
         .leftBumper()
         .whileTrue(new ParallelCommandGroup(indexer.set(0.8), shooter.set(0.69)));
 
-    opController.a().whileTrue(hopper.set(0.1));
-    opController.y().whileTrue(hopper.set(-0.1));
+    opController.a().whileTrue(hopper.set(0.2));
+    opController.y().whileTrue(hopper.set(-0.2));
 
     opController
         .b()
