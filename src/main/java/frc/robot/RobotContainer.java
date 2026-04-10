@@ -268,6 +268,8 @@ public class RobotContainer {
     // shooter to hub
     opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(50)));
 
+    opController.x().whileTrue(shooter.setVelocity(RotationsPerSecond.of(62.25)));
+
     // shooter reverse (never really used)
     opController.leftTrigger().whileTrue(shooter.set(-0.9));
 

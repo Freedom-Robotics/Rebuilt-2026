@@ -67,7 +67,7 @@ public class Shooter extends SubsystemBase {
 
   private final SmartMotorControllerConfig motorConfig =
       new SmartMotorControllerConfig(this)
-          .withClosedLoopController(0.001, 0, 0)
+          .withClosedLoopController(0.003, 0, 0)
           .withSimClosedLoopController(0, 0, 0)
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(60.0 / 40)))
           .withIdleMode(MotorMode.COAST)
@@ -189,16 +189,20 @@ public class Shooter extends SubsystemBase {
     double shooter_angle = 0.558; // radians
     double const_g = -9.8067 * 39.3701; // inches/second^2
     double error = dist * -5;
-    double shooter_velocity =
-        dist
-            / (Math.cos(shooter_angle)
-                * Math.sqrt(
-                    Math.abs((2 * (72 - 18.5 - (Math.tan(shooter_angle) * dist))) / const_g)));
+    // double shooter_velocity =
+    //     dist
+    //         / (Math.cos(shooter_angle)
+    //             * Math.sqrt(
+    //                 Math.abs((2 * (72 - 18.5 - (Math.tan(shooter_angle) * dist))) / const_g)));
 
-    shooter_velocity *= kshooter;
+    // shooter_velocity *= kshooter;
 
-    System.out.println("Shooter Velocity: " + (shooter_velocity + error) / 2);
+    double shooter_velocity = 47.11283 - 1.73724 * dist + 1.5707 * dist * dist;
 
-    return RotationsPerSecond.of((shooter_velocity + error) / 2);
+    // System.out.println("Shooter Velocity: " + (shooter_velocity + error) / 2);
+
+    System.out.println("Distance: " + dist);
+
+    return RotationsPerSecond.of(shooter_velocity);
   }
 }
