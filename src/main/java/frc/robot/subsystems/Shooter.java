@@ -197,7 +197,7 @@ public class Shooter extends SubsystemBase {
 
     // shooter_velocity *= kshooter;
 
-    double shooter_velocity = 42.5 - 2 * dist + 1.5707 * dist * dist;
+    double shooter_velocity = 43 - 2 * dist + 1.5707 * dist * dist;
 
     // System.out.println("Shooter Velocity: " + (shooter_velocity + error) / 2);
 
