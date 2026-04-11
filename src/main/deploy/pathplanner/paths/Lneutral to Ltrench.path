@@ -48,7 +48,7 @@
   "folder": "left trench",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -89.06080905426029
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }

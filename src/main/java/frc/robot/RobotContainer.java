@@ -164,7 +164,8 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Extend", hopper.set(-0.2));
 
-    NamedCommands.registerCommand("StopHopper", hopper.set(0));
+    NamedCommands.registerCommand(
+        "StopHopper", new ParallelDeadlineGroup(new WaitCommand(0.2), hopper.set(0)));
 
     NamedCommands.registerCommand("Retract", hopper.set(0.2));
     // Set up auto routines

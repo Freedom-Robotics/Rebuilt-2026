@@ -12,7 +12,7 @@
         "y": 7.14216457961076
       },
       "isLocked": false,
-      "linkedName": "Ltrench"
+      "linkedName": "Ltrench 2"
     },
     {
       "anchor": {
@@ -48,7 +48,7 @@
   "folder": "left trench",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 178.5311992856143
   },
   "useDefaultConstraints": true
 }
