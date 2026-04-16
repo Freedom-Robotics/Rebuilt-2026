@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
+import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import java.text.DecimalFormat;
@@ -118,6 +119,11 @@ public class DriveCommands {
                       : drive.getRotation()));
         },
         drive);
+  }
+
+  public static Command hopperSet(Hopper hopper, DoubleSupplier ySupplier) {
+    System.out.println(ySupplier.getAsDouble());
+    return hopper.set(0.5 * ySupplier.getAsDouble());
   }
 
   /**

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.48180679785330904,
-        "y": 7.547799642218246
+        "x": 0.44935599284436445,
+        "y": 6.963685152057245
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.9361180679785326,
-        "y": 7.223291592128801
+        "x": 0.4331305903398923,
+        "y": 6.4282468694096595
       },
       "isLocked": false,
-      "linkedName": "After Depot"
+      "linkedName": "CD2"
     },
     {
       "anchor": {
-        "x": 2.8831663685152056,
-        "y": 5.454722719141323
+        "x": 0.44935599284436445,
+        "y": 4.951735241502684
       },
       "prevControl": {
-        "x": 2.169248658318426,
-        "y": 6.28221824686941
+        "x": 0.46558139534883675,
+        "y": 5.487173524150268
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Lshoot"
+      "linkedName": "CD3"
     }
   ],
   "rotationTargets": [],
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.25,
-    "maxAcceleration": 1.5,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 139.18491612511832
+    "rotation": -90.0
   },
   "reversed": false,
-  "folder": "Depot",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -90.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

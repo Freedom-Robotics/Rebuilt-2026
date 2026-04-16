@@ -24,6 +24,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -142,6 +143,10 @@ public class Hopper extends SubsystemBase {
    */
   public Command set(double dutycycle) {
     return arm.set(dutycycle);
+  }
+
+  public Command set(Supplier<Double> sup) {
+    return arm.set(sup);
   }
 
   /** Run sysId on the {@link Arm} */

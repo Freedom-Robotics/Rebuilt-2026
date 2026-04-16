@@ -214,7 +214,7 @@ public class RobotContainer {
 
     shooter.setDefaultCommand(shooter.set(0));
     indexer.setDefaultCommand(indexer.set(0));
-    hopper.setDefaultCommand(hopper.set(0));
+    hopper.setDefaultCommand(hopper.set(() -> 0.2 * opController.getRightY()));
 
     // drive.setDefaultCommand(
     //     DriveCommands.joystickDriveAtAngle(
@@ -273,9 +273,9 @@ public class RobotContainer {
                 }));
 
     // shooter to hub
-    opController.rightTrigger().whileTrue(shooter.setVelocity(RotationsPerSecond.of(50)));
+    opController.b().whileTrue(shooter.setVelocity(RotationsPerSecond.of(50)));
 
-    opController.x().whileTrue(shooter.setVelocity(RotationsPerSecond.of(62.25)));
+    opController.x().whileTrue(shooter.setVelocity(RotationsPerSecond.of(17.5)));
 
     // shooter reverse (never really used)
     opController.leftTrigger().whileTrue(shooter.set(-0.9));
@@ -284,20 +284,18 @@ public class RobotContainer {
     // controller.rightBumper().whileTrue(indexer.set(-0.35));
 
     // hopper indexer to shooter
-    opController
-        .rightBumper()
-        .whileTrue(new ParallelCommandGroup(indexer.set(-0.6), hopper.set(0.2)));
+    opController.rightBumper().whileTrue(new ParallelCommandGroup(indexer.set(-0.6)));
 
     // intake to hopper
     opController
         .leftBumper()
         .whileTrue(new ParallelCommandGroup(indexer.set(0.8), shooter.set(0.69)));
 
-    opController.a().whileTrue(hopper.set(0.2));
-    opController.y().whileTrue(hopper.set(-0.2));
+    opController.a().whileTrue(hopper.set(0.15));
+    opController.y().whileTrue(hopper.set(-0.15));
 
     opController
-        .b()
+        .rightTrigger()
         .whileTrue(
             shooter.setVelocity(
                 () ->
